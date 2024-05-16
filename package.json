@@ -1,13 +1,13 @@
 {
-  "name": "nodejs",
+  "name": "birthday-wisher-bot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Birthday Reminder Bot is a Telegram bot designed to help you manage and remember birthdays of your friends and group members. With this bot, you can add, delete, and list birthdays, receive notifications for upcoming birthdays, and send custom birthday messages.",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "itsAakashz",
   "license": "ISC",
   "dependencies": {
     "@types/node": "^18.0.6",
