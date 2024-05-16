@@ -2,11 +2,10 @@ const { Telegraf, Markup } = require("telegraf");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const dotenv = require("dotenv");
-const BOT_TOKEN =process.env.BOT_TOKEN; //"5504112672:AAGRgomfz9NhidM84D9mv5dUFIbpLpASC4A";
+const BOT_TOKEN ="5504112672:AAGRgomfz9NhidM84D9mv5dUFIbpLpASC4A";
 const bot = new Telegraf(BOT_TOKEN);
 
-const MONGO_URI =process.env.MONGO_URI;
-  //"mongodb+srv://gzatrop:zatrop@cluster0.vxdybfm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI ="mongodb+srv://gzatrop:zatrop@cluster0.vxdybfm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // Connect to MongoDB
 mongoose
   .connect(MONGO_URI)
