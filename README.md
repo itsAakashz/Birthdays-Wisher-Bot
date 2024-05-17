@@ -11,6 +11,8 @@ Birthday Reminder Bot is a Telegram bot designed to help you manage and remember
 - Receive notifications for upcoming birthdays
 - Send custom birthday messages
 
+##Docs- https://techtutezs-organization.gitbook.io/docs/
+
 ## Getting Started
 
 To get started with Birthday Reminder Bot, follow these steps:
