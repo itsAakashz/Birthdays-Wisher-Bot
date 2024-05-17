@@ -2,8 +2,9 @@ const { Telegraf, Markup } = require("telegraf");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const dotenv = require("dotenv");
-const BOT_TOKEN =process.env.BOT_TOKEN
-const bot = new Telegraf(BOT_TOKEN);
+
+
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const MONGO_URI =process.env.MONGO_URI
 // Connect to MongoDB
