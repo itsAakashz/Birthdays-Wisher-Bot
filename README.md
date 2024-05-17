@@ -19,12 +19,12 @@ To get started with Birthday Reminder Bot, follow these steps:
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/your_username/birthday-reminder-bot.git
+   git clone https://github.com/itsAakashz/Birthdays-Wisher-Bot.git
    ```
 
 2. **Install dependencies:**
    ```sh
-   cd birthday-reminder-bot
+   cd Birthdays-Wisher-Bot
    npm install
    ```
 
