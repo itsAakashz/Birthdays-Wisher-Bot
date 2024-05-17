@@ -2,13 +2,14 @@ const { Telegraf, Markup } = require("telegraf");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const dotenv = require("dotenv");
-const BOT_TOKEN ="5504112672:AAGRgomfz9NhidM84D9mv5dUFIbpLpASC4A";
-const bot = new Telegraf(BOT_TOKEN);
 
-const MONGO_URI ="mongodb+srv://gzatrop:zatrop@cluster0.vxdybfm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+dotenv.config();
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
+
 // Connect to MongoDB
 mongoose
-  .connect(MONGO_URI)
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
