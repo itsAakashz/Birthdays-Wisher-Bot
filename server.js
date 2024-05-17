@@ -6,10 +6,10 @@ const dotenv = require("dotenv");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-const MONGO_URI =process.env.MONGO_URI
+
 // Connect to MongoDB
 mongoose
-  .connect(MONGO_URI)
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
