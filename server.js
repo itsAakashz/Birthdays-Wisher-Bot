@@ -442,7 +442,7 @@ bot.command("help", (ctx) => {
     Click the buttons below for more information or to get started!`;
 
   const buttons = Markup.inlineKeyboard([
-    Markup.button.url("📘 Documentation", "https://example.com/documentation"),
+    Markup.button.url("📘 Documentation", "https://techtutezs-organization.gitbook.io/docs/"),
     Markup.button.callback("🎂 About", "about"),
     Markup.button.callback("📞 Support", "support"),
   ]);
