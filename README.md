@@ -1,5 +1,5 @@
 
-# Birthday Reminder Bot
+# BirthdaysWisherBot
 
 Birthday Reminder Bot is a Telegram bot designed to help you manage and remember birthdays of your friends and group members. With this bot, you can add, delete, and list birthdays, receive notifications for upcoming birthdays, and send custom birthday messages.
 
