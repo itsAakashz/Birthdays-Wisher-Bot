@@ -528,6 +528,7 @@ bot.command("analytics", (ctx) => {
   }
 });
 
+//broadcast command
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID; // Add the bot owner's Telegram user ID to your .env file
 
 bot.command("broadcast", async (ctx) => {
@@ -544,34 +545,46 @@ bot.command("broadcast", async (ctx) => {
     return;
   }
 
+  const results = {
+    groups: { success: 0, failed: 0 },
+    users: { success: 0, failed: 0 }
+  };
+
   const sendMessageToGroup = async (groupId) => {
     try {
       await bot.telegram.sendMessage(groupId, messageText);
+      results.groups.success += 1;
     } catch (err) {
       console.error(`Failed to send message to group ${groupId}:`, err);
+      results.groups.failed += 1;
     }
   };
 
   const sendMessageToUser = async (userId) => {
     try {
       await bot.telegram.sendMessage(userId, messageText);
+      results.users.success += 1;
     } catch (err) {
       console.error(`Failed to send message to user ${userId}:`, err);
+      results.users.failed += 1;
     }
   };
 
   // Broadcast to all groups
-  groupsServed.forEach((groupId) => {
-    sendMessageToGroup(groupId);
-  });
+  for (const groupId of groupsServed) {
+    await sendMessageToGroup(groupId);
+  }
 
   // Broadcast to all users
-  usersStartedBot.forEach((userId) => {
-    sendMessageToUser(userId);
-  });
+  for (const userId of usersStartedBot) {
+    await sendMessageToUser(userId);
+  }
 
-  ctx.reply("Broadcast message sent successfully.");
+  ctx.reply(`Broadcast message sent successfully.
+Groups: ${results.groups.success} succeeded, ${results.groups.failed} failed.
+Users: ${results.users.success} succeeded, ${results.users.failed} failed.`);
 });
+
 
 // Launch the bot
 bot
