@@ -275,39 +275,54 @@ bot.command("birthdayList", async (ctx) => {
 
 // Function to check for birthdays and send messages in private messages only
 async function checkBirthdayPrivate() {
+  // Get the current date
   const today = new Date();
-  const formattedToday = `${String(today.getDate()).padStart(2, "0")}-${String(
-    today.getMonth() + 1,
-  ).padStart(2, "0")}-${today.getFullYear()}`;
+  const formattedToday = `${String(today.getDate()).padStart(2, "0")}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
   try {
-    // Get birthdays for today and two days later
+    // Calculate day and month for the next two days
+    const oneDayBefore = new Date(today);
+    oneDayBefore.setDate(today.getDate() + 1);
+    const formattedOneDayBefore = `${String(oneDayBefore.getDate()).padStart(2, "0")}-${String(oneDayBefore.getMonth() + 1).padStart(2, "0")}`;
+
+    const twoDaysBefore = new Date(today);
+    twoDaysBefore.setDate(today.getDate() + 2);
+    const formattedTwoDaysBefore = `${String(twoDaysBefore.getDate()).padStart(2, "0")}-${String(twoDaysBefore.getMonth() + 1).padStart(2, "0")}`;
+
+    // Query the database for birthdays on these dates
     const birthdaysToday = await BirthdayPersonalData.find({
-      date: formattedToday,
-    });
-    const twoDaysLater = new Date(today);
-    twoDaysLater.setDate(today.getDate() + 2);
-    const formattedTwoDaysLater = `${String(twoDaysLater.getDate()).padStart(2, "0")}-${String(
-      twoDaysLater.getMonth() + 1,
-    ).padStart(2, "0")}-${twoDaysLater.getFullYear()}`;
-    const birthdaysTwoDaysLater = await BirthdayPersonalData.find({
-      date: formattedTwoDaysLater,
+      date: new RegExp(`^${formattedToday}-\\d{4}$`),
     });
 
+    const birthdaysOneDayBefore = await BirthdayPersonalData.find({
+      date: new RegExp(`^${formattedOneDayBefore}-\\d{4}$`),
+    });
+
+    const birthdaysTwoDaysBefore = await BirthdayPersonalData.find({
+      date: new RegExp(`^${formattedTwoDaysBefore}-\\d{4}$`),
+    });
+
+    // Send notifications for today
     for (const birthday of birthdaysToday) {
       const userId = birthday.userId;
-
-      // Send notification for the birthday today
       await bot.telegram.sendMessage(
         userId,
         `🎉 Hey! Today is your friend ${birthday.name}'s birthday! Don't forget to wish them a fantastic day! 🎂`,
       );
     }
 
-    for (const birthday of birthdaysTwoDaysLater) {
+    // Send notifications for one day before
+    for (const birthday of birthdaysOneDayBefore) {
       const userId = birthday.userId;
+      await bot.telegram.sendMessage(
+        userId,
+        `🎉 Just a friendly reminder: Tomorrow is your friend ${birthday.name}'s birthday! Don't forget to send them your best wishes! 🎈`,
+      );
+    }
 
-      // Send notification for the birthday approaching in two days
+    // Send notifications for two days before
+    for (const birthday of birthdaysTwoDaysBefore) {
+      const userId = birthday.userId;
       await bot.telegram.sendMessage(
         userId,
         `🎉 Just a friendly reminder: In two days, it's your friend ${birthday.name}'s birthday! Don't forget to send them your best wishes! 🎈`,
@@ -318,33 +333,33 @@ async function checkBirthdayPrivate() {
   }
 }
 
+
 // Function to check for birthdays and send messages in group chats
 async function checkBirthdayGroup() {
   const today = new Date();
-  const formattedToday = `${String(today.getDate()).padStart(2, "0")}-${String(
-    today.getMonth() + 1,
-  ).padStart(2, "0")}-${today.getFullYear()}`;
+  const formattedToday = `${String(today.getDate()).padStart(2, "0")}-${String(today.getMonth() + 1).padStart(2, "0")}`;
 
   try {
-    // Get birthdays for today, one day before, and two days before
-    const birthdaysToday = await BirthdayGroupData.find({
-      date: formattedToday,
-    });
+    // Calculate day and month for one and two days before
     const oneDayBefore = new Date(today);
     oneDayBefore.setDate(today.getDate() + 1);
-    const formattedOneDayBefore = `${String(oneDayBefore.getDate()).padStart(2, "0")}-${String(
-      oneDayBefore.getMonth() + 1,
-    ).padStart(2, "0")}-${oneDayBefore.getFullYear()}`;
-    const birthdaysOneDayBefore = await BirthdayGroupData.find({
-      date: formattedOneDayBefore,
-    });
+    const formattedOneDayBefore = `${String(oneDayBefore.getDate()).padStart(2, "0")}-${String(oneDayBefore.getMonth() + 1).padStart(2, "0")}`;
+
     const twoDaysBefore = new Date(today);
     twoDaysBefore.setDate(today.getDate() + 2);
-    const formattedTwoDaysBefore = `${String(twoDaysBefore.getDate()).padStart(2, "0")}-${String(
-      twoDaysBefore.getMonth() + 1,
-    ).padStart(2, "0")}-${twoDaysBefore.getFullYear()}`;
+    const formattedTwoDaysBefore = `${String(twoDaysBefore.getDate()).padStart(2, "0")}-${String(twoDaysBefore.getMonth() + 1).padStart(2, "0")}`;
+
+    // Query the database for birthdays on these dates
+    const birthdaysToday = await BirthdayGroupData.find({
+      date: new RegExp(`^${formattedToday}-\\d{4}$`),
+    });
+
+    const birthdaysOneDayBefore = await BirthdayGroupData.find({
+      date: new RegExp(`^${formattedOneDayBefore}-\\d{4}$`),
+    });
+
     const birthdaysTwoDaysBefore = await BirthdayGroupData.find({
-      date: formattedTwoDaysBefore,
+      date: new RegExp(`^${formattedTwoDaysBefore}-\\d{4}$`),
     });
 
     // Function to generate the birthday wish message
@@ -353,35 +368,23 @@ async function checkBirthdayGroup() {
     }
 
     // Function to generate the birthday notification message
-    function generateBirthdayNotification(day, birthdayPerson) {
-      return `🎉 Hey everyone, just a reminder: ${day} day left for @${birthdayPerson}'s birthday! Let's get ready to celebrate together! 🎈🥳`;
+    function generateBirthdayNotification(daysLeft, birthdayPerson) {
+      return `🎉 Hey everyone, just a reminder: ${daysLeft} day(s) left for @${birthdayPerson}'s birthday! Let's get ready to celebrate together! 🎈🥳`;
     }
 
     // Send notification one day before birthday
     for (const birthday of birthdaysOneDayBefore) {
       const chatId = birthday.chatId;
-      const userInfo = await bot.telegram.getChatMember(
-        chatId,
-        birthday.userId,
-      );
-      const notification = generateBirthdayNotification(
-        "one",
-        userInfo.user.username,
-      );
+      const userInfo = await bot.telegram.getChatMember(chatId, birthday.userId);
+      const notification = generateBirthdayNotification("one", userInfo.user.username);
       await bot.telegram.sendMessage(chatId, notification);
     }
 
     // Send notification two days before birthday
     for (const birthday of birthdaysTwoDaysBefore) {
       const chatId = birthday.chatId;
-      const userInfo = await bot.telegram.getChatMember(
-        chatId,
-        birthday.userId,
-      );
-      const notification = generateBirthdayNotification(
-        "two",
-        userInfo.user.username,
-      );
+      const userInfo = await bot.telegram.getChatMember(chatId, birthday.userId);
+      const notification = generateBirthdayNotification("two", userInfo.user.username);
       await bot.telegram.sendMessage(chatId, notification);
     }
 
@@ -407,6 +410,7 @@ async function checkBirthdayGroup() {
     console.error("Error checking birthdays in group:", err);
   }
 }
+
 
 // Set an interval to check birthdays in private messages every day at midnight
 setInterval(checkBirthdayPrivate, 24 * 60 * 60 * 1000);
