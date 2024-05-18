@@ -40,6 +40,42 @@ const BirthdayPersonalData = mongoose.model(
   personalBirthdaySchema,
 );
 
+// Define schemas and models for tracking users and groups
+const userSchema = new mongoose.Schema({
+  userId: { type: String, required: true, unique: true },
+});
+
+const groupSchema = new mongoose.Schema({
+  chatId: { type: String, required: true, unique: true },
+});
+
+const User = mongoose.model('User', userSchema);
+const Group = mongoose.model('Group', groupSchema);
+
+bot.use(async (ctx, next) => {
+  if (ctx.message) {
+    const userId = ctx.message.from.id.toString();
+    const chatId = ctx.message.chat.id.toString();
+
+    if (ctx.message.chat.type === 'private') {
+      // Track users who start the bot
+      try {
+        await User.updateOne({ userId }, { userId }, { upsert: true });
+      } catch (err) {
+        console.error('Error tracking user:', err);
+      }
+    } else if (ctx.message.chat.type === 'group' || ctx.message.chat.type === 'supergroup') {
+      // Track groups the bot is added to
+      try {
+        await Group.updateOne({ chatId }, { chatId }, { upsert: true });
+      } catch (err) {
+        console.error('Error tracking group:', err);
+      }
+    }
+  }
+  return next();
+});
+
 // Function to generate a custom birthday message
 // async function generateCustomMessage(name) {
 //   try {
@@ -531,17 +567,17 @@ bot.command("analytics", (ctx) => {
 //broadcast command
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID; // Add the bot owner's Telegram user ID to your .env file
 
-bot.command("broadcast", async (ctx) => {
+bot.command('broadcast', async (ctx) => {
   const userId = ctx.message.from.id.toString();
 
   if (userId !== BOT_OWNER_ID) {
-    ctx.reply("You are not authorized to use this command.");
+    ctx.reply('You are not authorized to use this command.');
     return;
   }
 
-  const messageText = ctx.message.text.split(" ").slice(1).join(" ");
+  const messageText = ctx.message.text.split(' ').slice(1).join(' ');
   if (!messageText) {
-    ctx.reply("Please provide a message to broadcast. Usage: /broadcast [message]");
+    ctx.reply('Please provide a message to broadcast. Usage: /broadcast [message]');
     return;
   }
 
@@ -550,40 +586,49 @@ bot.command("broadcast", async (ctx) => {
     users: { success: 0, failed: 0 }
   };
 
-  const sendMessageToGroup = async (groupId) => {
-    try {
-      await bot.telegram.sendMessage(groupId, messageText);
-      results.groups.success += 1;
-    } catch (err) {
-      console.error(`Failed to send message to group ${groupId}:`, err);
-      results.groups.failed += 1;
+  try {
+    const groups = await Group.find({});
+    const users = await User.find({});
+
+    const sendMessageToGroup = async (groupId) => {
+      try {
+        await bot.telegram.sendMessage(groupId, messageText);
+        results.groups.success += 1;
+      } catch (err) {
+        console.error(`Failed to send message to group ${groupId}:`, err);
+        results.groups.failed += 1;
+      }
+    };
+
+    const sendMessageToUser = async (userId) => {
+      try {
+        await bot.telegram.sendMessage(userId, messageText);
+        results.users.success += 1;
+      } catch (err) {
+        console.error(`Failed to send message to user ${userId}:`, err);
+        results.users.failed += 1;
+      }
+    };
+
+    // Broadcast to all groups
+    for (const group of groups) {
+      await sendMessageToGroup(group.chatId);
     }
-  };
 
-  const sendMessageToUser = async (userId) => {
-    try {
-      await bot.telegram.sendMessage(userId, messageText);
-      results.users.success += 1;
-    } catch (err) {
-      console.error(`Failed to send message to user ${userId}:`, err);
-      results.users.failed += 1;
+    // Broadcast to all users
+    for (const user of users) {
+      await sendMessageToUser(user.userId);
     }
-  };
 
-  // Broadcast to all groups
-  for (const groupId of groupsServed) {
-    await sendMessageToGroup(groupId);
-  }
-
-  // Broadcast to all users
-  for (const userId of usersStartedBot) {
-    await sendMessageToUser(userId);
-  }
-
-  ctx.reply(`Broadcast message sent successfully.
+    ctx.reply(`Broadcast message sent successfully.
 Groups: ${results.groups.success} succeeded, ${results.groups.failed} failed.
 Users: ${results.users.success} succeeded, ${results.users.failed} failed.`);
+  } catch (err) {
+    console.error('Error broadcasting message:', err);
+    ctx.reply('There was an error broadcasting the message. Please try again.');
+  }
 });
+
 
 
 // Launch the bot
