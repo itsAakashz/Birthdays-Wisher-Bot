@@ -60,9 +60,10 @@ bot.start((ctx) => {
 Here's what you can do:
 - Add your birthday by typing /mybirthday [your birthday in DD-MM-YYYY format]. Example: /mybirthday 15-08-2006
 - Remove your birthday by typing /deletebirthday
-- See the list of birthdays added in this group with /birthdayList
+- See the list of birthdays added in this group with /birthdaylist
 
-I'll send a special message on your birthday! 😊`
+I'll send a special message on your birthday! 😊
+Use /help for more info`
     : `🎉 Welcome! I'm delighted to meet you!
 
 I'm here to help you keep track of your friends' birthdays and ensure you never miss a special day. Here's what you can do:
@@ -70,10 +71,12 @@ I'm here to help you keep track of your friends' birthdays and ensure you never 
 🎂 Command for DM only:
 
 Add your friend's birthday by typing /addbirthday YOUR_FRIEND_NAME DD-MM-YYYY.
-Example: /addbirthday Aakashuu 15-08-2006
+Example: /addbirthday Aakash_Gupta 15-08-2006
 Remove your birthday by typing /deletebirthday
-See the list of birthdays added in this group with /birthdayList
+See the list of birthdays added in this group with /birthdaylist
+
 I'll make sure your friends receive warm wishes on their special day! 🎈
+Use /help for more info.
 `;
 
   ctx.reply(message);
@@ -186,7 +189,7 @@ bot.command("deletebirthday", async (ctx) => {
 
     if (!name) {
       ctx.reply(
-        "Please provide the name of the friend whose birthday you want to delete.",
+        "Please provide the name of the friend whose birthday you want to delete.\n Enter names as it is you have written while adding.",
       );
       return;
     }
@@ -439,7 +442,7 @@ bot.command("help", (ctx) => {
     Use /deletebirthday to remove your birthday from the list.
 
     -View Birthday List:
-    Use /birthdayList to see all birthdays added in the group or in your personal list.
+    Use /birthdaylist to see all birthdays added in the group or in your personal list.
     Special Birthday Messages:
 
     The bot will send a custom birthday message on your special day, and even pin the message in group chats!
@@ -482,7 +485,7 @@ ABOUT_REPLY = `🎉 About Birthday Reminder Bot 🎉
     Use /deletebirthday to remove your birthday from the list.
 
     -View Birthday List:
-    Use /birthdayList to see all birthdays added in the group or in your personal list.
+    Use /birthdaylist to see all birthdays added in the group or in your personal list.
     Special Birthday Messages:
 
     The bot will send a custom birthday message on your special day, and even pin the message in group chats!
