@@ -6,6 +6,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+// Counters for analytics
+let groupsServed = new Set();
+let usersStartedBot = new Set();
+
 
 // Connect to MongoDB
 mongoose
@@ -52,7 +56,14 @@ const BirthdayPersonalData = mongoose.model(
 // Start command
 bot.start((ctx) => {
   const chatId = ctx.message.chat.id;
+  const userId = ctx.message.from.id;
   const isGroup = chatId < 0;
+
+  if (isGroup) {
+    groupsServed.add(chatId);
+  } else {
+    usersStartedBot.add(userId);
+  }
 
   const message = isGroup
     ? `🎉 Hi everyone! I'm here to help you keep track of everyone's birthdays in this group! 🎂
@@ -60,27 +71,25 @@ bot.start((ctx) => {
 Here's what you can do:
 - Add your birthday by typing /mybirthday [your birthday in DD-MM-YYYY format]. Example: /mybirthday 15-08-2006
 - Remove your birthday by typing /deletebirthday
-- See the list of birthdays added in this group with /birthdaylist
+- See the list of birthdays added in this group with /birthdayList
 
-I'll send a special message on your birthday! 😊
-Use /help for more info`
+I'll send a special message on your birthday! 😊`
     : `🎉 Welcome! I'm delighted to meet you!
 
 I'm here to help you keep track of your friends' birthdays and ensure you never miss a special day. Here's what you can do:
 
 🎂 Command for DM only:
 
-Add your friend's birthday by typing /addbirthday YOUR_FRIEND_NAME DD-MM-YYYY.
+Add your friend's birthday by typing /addbirthday [Friend's Name] DD-MM-YYYY.
 Example: /addbirthday Aakash_Gupta 15-08-2006
 Remove your birthday by typing /deletebirthday
-See the list of birthdays added in this group with /birthdaylist
-
+See the list of birthdays added in this group with /birthdayList
 I'll make sure your friends receive warm wishes on their special day! 🎈
-Use /help for more info.
 `;
 
   ctx.reply(message);
 });
+
 
 // Command to add birthdays (for DM only)
 bot.command("addbirthday", async (ctx) => {
@@ -502,6 +511,67 @@ bot.action("about", (ctx) => ctx.reply(ABOUT_REPLY));
 
 // Basic responses
 bot.on("sticker", (ctx) => ctx.reply("👍"));
+
+bot.command("analytics", (ctx) => {
+  const chatId = ctx.message.chat.id;
+  const isGroup = chatId < 0;
+
+  if (!isGroup) {
+    const groupCount = groupsServed.size;
+    const userCount = usersStartedBot.size;
+
+    ctx.reply(`📊 Bot Analytics:
+- Number of groups served: ${groupCount}
+- Number of users who started the bot: ${userCount}`);
+  } else {
+    ctx.reply("This command can only be used in direct messages.");
+  }
+});
+
+const BOT_OWNER_ID = process.env.BOT_OWNER_ID; // Add the bot owner's Telegram user ID to your .env file
+
+bot.command("broadcast", async (ctx) => {
+  const userId = ctx.message.from.id.toString();
+
+  if (userId !== BOT_OWNER_ID) {
+    ctx.reply("You are not authorized to use this command.");
+    return;
+  }
+
+  const messageText = ctx.message.text.split(" ").slice(1).join(" ");
+  if (!messageText) {
+    ctx.reply("Please provide a message to broadcast. Usage: /broadcast [message]");
+    return;
+  }
+
+  const sendMessageToGroup = async (groupId) => {
+    try {
+      await bot.telegram.sendMessage(groupId, messageText);
+    } catch (err) {
+      console.error(`Failed to send message to group ${groupId}:`, err);
+    }
+  };
+
+  const sendMessageToUser = async (userId) => {
+    try {
+      await bot.telegram.sendMessage(userId, messageText);
+    } catch (err) {
+      console.error(`Failed to send message to user ${userId}:`, err);
+    }
+  };
+
+  // Broadcast to all groups
+  groupsServed.forEach((groupId) => {
+    sendMessageToGroup(groupId);
+  });
+
+  // Broadcast to all users
+  usersStartedBot.forEach((userId) => {
+    sendMessageToUser(userId);
+  });
+
+  ctx.reply("Broadcast message sent successfully.");
+});
 
 // Launch the bot
 bot
