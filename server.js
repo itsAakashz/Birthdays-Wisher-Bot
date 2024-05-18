@@ -226,7 +226,7 @@ bot.command("deletebirthday", async (ctx) => {
 });
 
 // Command to list birthdays in the group and direct message
-bot.command("birthdayList", async (ctx) => {
+bot.command("birthdaylist", async (ctx) => {
   const chatId = ctx.message.chat.id;
   const isGroup = chatId < 0;
   let birthdays = [];
