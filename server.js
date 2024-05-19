@@ -5,11 +5,8 @@ const { CronJob } = require("cron"); // Add this line
 
 dotenv.config();
 
-BOT_TOKEN = "7110255055:AAHMwa20k9NaROEZHPIKL9rBiEUZVEcvIog";
-MONGO_URI =
-  "mongodb+srv://techtutez:qwertyuiop@test.ztjp8fn.mongodb.net/?retryWrites=true&w=majority&appName=tesproduction";
 
-const bot = new Telegraf(process.env.BOT_TOKEN || BOT_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Counters for analytics
 let groupsServed = new Set();
@@ -17,7 +14,7 @@ let usersStartedBot = new Set();
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGO_URI || MONGO_URI)
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("Successfully connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
 
