@@ -501,35 +501,20 @@ async function checkBirthdayGroup() {
 
 // Schedule tasks using cron
 const checkBirthdayPrivateJob = new CronJob(
-  "0 0 0 * * *",
+  '0 0 0 * * *',
   checkBirthdayPrivate,
   null,
   true,
-  "America/Los_Angeles",
+  'Asia/Kolkata'
 );
 
 const checkBirthdayGroupJob = new CronJob(
-  "0 0 0 * * *",
+  '0 0 0 * * *',
   checkBirthdayGroup,
   null,
   true,
-  "America/Los_Angeles",
+  'Asia/Kolkata'
 );
-// const checkBirthdayPrivateJob = new CronJob(
-//   '53 20 * * *',
-//   checkBirthdayPrivate,
-//   null,
-//   true,
-//   'Asia/Kolkata'
-// );
-
-// const checkBirthdayGroupJob = new CronJob(
-//   '53 20 * * *',
-//   checkBirthdayGroup,
-//   null,
-//   true,
-//   'Asia/Kolkata'
-// );
 
 // Start the jobs
 checkBirthdayPrivateJob.start();
