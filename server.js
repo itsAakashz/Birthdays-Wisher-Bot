@@ -520,5 +520,182 @@ const checkBirthdayGroupJob = new CronJob(
 checkBirthdayPrivateJob.start();
 checkBirthdayGroupJob.start();
 
+// Help command with buttons and features explanation
+bot.command("help", (ctx) => {
+  const helpMessage = `🤖 *Welcome to Birthday Reminder Bot* 🎉
+
+    This bot helps you manage birthdays and sends reminders for upcoming birthdays. Here are some things you can do:
+
+    Add Your Birthday:
+
+    -In Group Chats: 
+    Use /mybirthday [DD-MM-YYYY] to add your birthday.
+    Example: /mybirthday 15-08-2006
+
+    -In Private Messages: 
+    Use /addbirthday [Friend's Name] [DD-MM-YYYY] to add a friend's birthday.
+    Example: /addbirthday Aakashuu 15-08-2006
+
+    **Commands for both Groups and Private**
+    -Remove Your Birthday:
+    Use /deletebirthday to remove your birthday from the list.
+
+    -View Birthday List:
+    Use /birthdaylist to see all birthdays added in the group or in your personal list.
+    Special Birthday Messages:
+
+    The bot will send a custom birthday message on your special day, and even pin the message in group chats!
+
+    Click the buttons below for more information or to get started!`;
+
+  const buttons = Markup.inlineKeyboard([
+    Markup.button.url("📘 Documentation", "https://techtutezs-organization.gitbook.io/docs/"),
+    Markup.button.callback("🎂 About", "about"),
+    Markup.button.callback("📞 Support", "support"),
+  ]);
+
+  ctx.reply(helpMessage, buttons);
+});
+
+// Handle button callbacks
+bot.action("support", (ctx) =>
+  ctx.reply(
+    "Birthday Reminder Bot v1.0. Developed by @itsAkashz.\n Feel free to DM for any support and reporting bugs.",
+  ),
+);
+
+ABOUT_REPLY = `🎉 About Birthday Reminder Bot 🎉
+
+    Welcome to the Birthday Reminder Bot, your personal assistant for managing and remembering birthdays! Developed by YourName, this bot ensures that you never miss a special day, whether it's your birthday or your friends'. Here's what you can do with the bot:
+
+    🎂 Key Features
+    Add Your Birthday:
+
+    -In Group Chats: 
+    Use /mybirthday [DD-MM-YYYY] to add your birthday.
+    Example: /mybirthday 15-08-2006
+
+    -In Private Messages: 
+    Use /addbirthday [Friend's Name] [DD-MM-YYYY] to add a friend's birthday.
+    Example: /addbirthday Aakashuu 15-08-2006
+
+    **Commands for both Groups and Private**
+    -Remove Your Birthday:
+    Use /deletebirthday to remove your birthday from the list.
+
+    -View Birthday List:
+    Use /birthdaylist to see all birthdays added in the group or in your personal list.
+    Special Birthday Messages:
+
+    The bot will send a custom birthday message on your special day, and even pin the message in group chats!
+
+    📚 Additional Commands
+    Help: Use /help to see a list of available commands and get more information about how to use the bot.
+    Contact Support: Get in touch with support if you have any questions or need assistance. Use the command /contact.
+
+    🤖 Developed By
+    Developer: Aakash Gupta
+    Contact: gzatrop@mail.com
+    Thank you for using Birthday Reminder Bot! We hope it makes your special days even more memorable. 🎈`;
+bot.action("about", (ctx) => ctx.reply(ABOUT_REPLY));
+
+// Basic responses
+bot.on("sticker", (ctx) => ctx.reply("👍"));
+
+//Analytics command
+bot.command("analytics", (ctx) => {
+  const chatId = ctx.message.chat.id;
+  const isGroup = chatId < 0;
+
+  if (!isGroup) {
+    const groupCount = groupsServed.size;
+    const userCount = usersStartedBot.size;
+
+    ctx.reply(`📊 Bot Analytics:
+- Number of groups served: ${groupCount}
+- Number of users who started the bot: ${userCount}`);
+  } else {
+    ctx.reply("This command can only be used in direct messages.");
+  }
+});
+
+//broadcast command start here
+const BOT_OWNER_ID = process.env.BOT_OWNER_ID; // Add the bot owner's Telegram user ID to your .env file
+
+bot.command('broadcast', async (ctx) => {
+  const userId = ctx.message.from.id.toString();
+
+  if (userId !== BOT_OWNER_ID) {
+    ctx.reply('You are not authorized to use this command.');
+    return;
+  }
+
+  const messageText = ctx.message.text.split(' ').slice(1).join(' ');
+  if (!messageText) {
+    ctx.reply('Please provide a message to broadcast. Usage: /broadcast [message]');
+    return;
+  }
+
+  const results = {
+    groups: { success: 0, failed: 0 },
+    users: { success: 0, failed: 0 }
+  };
+
+  try {
+    const groups = await Group.find({});
+    const users = await User.find({});
+
+    const sendMessageToGroup = async (groupId) => {
+      try {
+        await bot.telegram.sendMessage(groupId, messageText);
+        results.groups.success += 1;
+      } catch (err) {
+        console.error(`Failed to send message to group ${groupId}:`, err);
+        results.groups.failed += 1;
+      }
+    };
+
+    const sendMessageToUser = async (userId) => {
+      try {
+        await bot.telegram.sendMessage(userId, messageText);
+        results.users.success += 1;
+      } catch (err) {
+        console.error(`Failed to send message to user ${userId}:`, err);
+        results.users.failed += 1;
+      }
+    };
+
+    // Broadcast to all groups
+    for (const group of groups) {
+      await sendMessageToGroup(group.chatId);
+    }
+
+    // Broadcast to all users
+    for (const user of users) {
+      await sendMessageToUser(user.userId);
+    }
+
+    ctx.reply(`Broadcast message sent successfully.
+Groups: ${results.groups.success} succeeded, ${results.groups.failed} failed.
+Users: ${results.users.success} succeeded, ${results.users.failed} failed.`);
+  } catch (err) {
+    console.error('Error broadcasting message:', err);
+    ctx.reply('There was an error broadcasting the message. Please try again.');
+  }
+});
+
+
+
 // Launch the bot
-bot.launch();
+bot
+  .launch()
+  .then(() => {
+    console.log("Bot started successfully");
+  })
+  .catch((err) => {
+    console.error("Error starting the bot:", err);
+  });
+
+// Enable graceful stop
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
