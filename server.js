@@ -107,7 +107,7 @@ bot.start((ctx) => {
 Here's what you can do:
 - Add your birthday by typing /mybirthday [your birthday in DD-MM-YYYY format]. Example: /mybirthday 15-08-2006
 - Remove your birthday by typing /deletebirthday
-- See the list of birthdays added in this group with /birthdayList
+- See the list of birthdays added in this group with /birthdaylist
 
 I'll send a special message on your birthday! 😊`
     : `🎉 Welcome! I'm delighted to meet you!
@@ -119,7 +119,7 @@ I'm here to help you keep track of your friends' birthdays and ensure you never 
 Add your friend's birthday by typing /addbirthday [Friend's Name] DD-MM-YYYY.
 Example: /addbirthday Aakash_Gupta 15-08-2006
 Remove your birthday by typing /deletebirthday
-See the list of birthdays added in this group with /birthdayList
+See the list of birthdays added in this group with /birthdaylist
 I'll make sure your friends receive warm wishes on their special day! 🎈
 `;
 
