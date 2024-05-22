@@ -380,124 +380,100 @@ async function checkBirthdayPrivate() {
 }
 
 // Function to check for birthdays and send messages in group chats
+// Utility function to format a date as DD-MM
+function formatDate(date) {
+  return `${String(date.getDate()).padStart(2, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// Utility function to add days to a date
+function addDays(date, days) {
+  const newDate = new Date(date);
+  newDate.setDate(date.getDate() + days);
+  return newDate;
+}
+
+// Function to generate a birthday wish message
+function generateBirthdayWish(name) {
+  return `🎂🎉 Happy Birthday, ${name}! 🎈🥳\n\nMay your special day be filled with love, joy, and unforgettable moments. Wishing you all the happiness in the world on your birthday and always! 🎁🎈`;
+}
+
+// Function to generate a birthday notification message
+function generateBirthdayNotification(daysLeft, birthdayPerson) {
+  return `🎉 Hey everyone, just a reminder: ${daysLeft} day(s) left for @${birthdayPerson}'s birthday! Let's get ready to celebrate together! 🎈🥳`;
+}
+
+// Main function to check birthdays and send messages in group chats
 async function checkBirthdayGroup() {
   const today = new Date();
-  const formattedToday = `${String(today.getDate()).padStart(2, "0")}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+  const formattedToday = formatDate(today);
+  const formattedOneDayBefore = formatDate(addDays(today, 1));
+  const formattedTwoDaysBefore = formatDate(addDays(today, 2));
+
+  console.log(`Checking birthdays for today (${formattedToday}), one day before (${formattedOneDayBefore}), and two days before (${formattedTwoDaysBefore}).`);
 
   try {
-    const oneDayBefore = new Date(today);
-    oneDayBefore.setDate(today.getDate() + 1);
-    const formattedOneDayBefore = `${String(oneDayBefore.getDate()).padStart(2, "0")}-${String(oneDayBefore.getMonth() + 1).padStart(2, "0")}`;
-
-    const twoDaysBefore = new Date(today);
-    twoDaysBefore.setDate(today.getDate() + 2);
-    const formattedTwoDaysBefore = `${String(twoDaysBefore.getDate()).padStart(2, "0")}-${String(twoDaysBefore.getMonth() + 1).padStart(2, "0")}`;
-
-    console.log(
-      `Checking birthdays for today (${formattedToday}), one day before (${formattedOneDayBefore}), and two days before (${formattedTwoDaysBefore}).`,
-    );
-
     // Log all birthdays for debugging
     const allBirthdays = await BirthdayGroupData.find({});
     console.log("All Birthdays in Group Data:", allBirthdays);
 
-    // Use regular expressions to match dates based on day and month
-    const birthdaysToday = await BirthdayGroupData.find({
-      date: new RegExp(`^${formattedToday}`),
-    });
+    // Fetch birthdays for today, one day before, and two days before
+    const [birthdaysToday, birthdaysOneDayBefore, birthdaysTwoDaysBefore] = await Promise.all([
+      BirthdayGroupData.find({ date: new RegExp(`^${formattedToday}`) }),
+      BirthdayGroupData.find({ date: new RegExp(`^${formattedOneDayBefore}`) }),
+      BirthdayGroupData.find({ date: new RegExp(`^${formattedTwoDaysBefore}`) }),
+    ]);
+
     console.log("Birthdays Today:", birthdaysToday);
-
-    const birthdaysOneDayBefore = await BirthdayGroupData.find({
-      date: new RegExp(`^${formattedOneDayBefore}`),
-    });
     console.log("Birthdays One Day Before:", birthdaysOneDayBefore);
-
-    const birthdaysTwoDaysBefore = await BirthdayGroupData.find({
-      date: new RegExp(`^${formattedTwoDaysBefore}`),
-    });
     console.log("Birthdays Two Days Before:", birthdaysTwoDaysBefore);
 
-    function generateBirthdayWish(name) {
-      return `🎂🎉 Happy Birthday, ${name}! 🎈🥳\n\nMay your special day be filled with love, joy, and unforgettable moments. Wishing you all the happiness in the world on your birthday and always! 🎁🎈`;
-    }
-
-    function generateBirthdayNotification(daysLeft, birthdayPerson) {
-      return `🎉 Hey everyone, just a reminder: ${daysLeft} day(s) left for @${birthdayPerson}'s birthday! Let's get ready to celebrate together! 🎈🥳`;
-    }
-
-    if (
-      birthdaysToday.length === 0 &&
-      birthdaysOneDayBefore.length === 0 &&
-      birthdaysTwoDaysBefore.length === 0
-    ) {
-      console.log(
-        "No birthdays to notify for today, one day before, or two days before.",
-      );
+    if (!birthdaysToday.length && !birthdaysOneDayBefore.length && !birthdaysTwoDaysBefore.length) {
+      console.log("No birthdays to notify for today, one day before, or two days before.");
       return;
     }
 
+    // Send notifications for one day before birthdays
     for (const birthday of birthdaysOneDayBefore) {
       try {
-        const chatId = birthday.chatId;
-        const userInfo = await bot.telegram.getChatMember(
-          chatId,
-          birthday.userId,
-        );
-        const notification = generateBirthdayNotification(
-          "one",
-          userInfo.user.username || userInfo.user.first_name,
-        );
+        const { chatId, userId } = birthday;
+        const userInfo = await bot.telegram.getChatMember(chatId, userId);
+        const notification = generateBirthdayNotification("one", userInfo.user.username || userInfo.user.first_name);
         await bot.telegram.sendMessage(chatId, notification);
       } catch (err) {
-        console.error(
-          "Error sending one day before birthday notification:",
-          err,
-        );
+        console.error("Error sending one day before birthday notification:", err);
       }
     }
 
+    // Send notifications for two days before birthdays
     for (const birthday of birthdaysTwoDaysBefore) {
       try {
-        const chatId = birthday.chatId;
-        const userInfo = await bot.telegram.getChatMember(
-          chatId,
-          birthday.userId,
-        );
-        const notification = generateBirthdayNotification(
-          "two",
-          userInfo.user.username || userInfo.user.first_name,
-        );
+        const { chatId, userId } = birthday;
+        const userInfo = await bot.telegram.getChatMember(chatId, userId);
+        const notification = generateBirthdayNotification("two", userInfo.user.username || userInfo.user.first_name);
         await bot.telegram.sendMessage(chatId, notification);
       } catch (err) {
-        console.error(
-          "Error sending two days before birthday notification:",
-          err,
-        );
+        console.error("Error sending two days before birthday notification:", err);
       }
     }
 
+    // Send birthday wishes for today
     for (const birthday of birthdaysToday) {
       try {
-        const userId = birthday.userId;
-        const chatId = birthday.chatId;
+        const { chatId, userId } = birthday;
         const userInfo = await bot.telegram.getChatMember(chatId, userId);
         const taggedName = `@${userInfo.user.username || userInfo.user.first_name}`;
         const birthdayWish = generateBirthdayWish(taggedName);
-        const message = await bot.telegram.sendMessage(chatId, birthdayWish, {
-          parse_mode: "Markdown",
-        });
+        const message = await bot.telegram.sendMessage(chatId, birthdayWish, { parse_mode: "Markdown" });
         await bot.telegram.pinChatMessage(chatId, message.message_id);
       } catch (err) {
-        console.error(
-          "Error sending today birthday wish and pinning message:",
-          err,
-        );
+        console.error("Error sending today birthday wish and pinning message:", err);
       }
     }
   } catch (err) {
     console.error("Error checking birthdays in group:", err);
   }
 }
+
 
 // Schedule tasks using cron
 const checkBirthdayPrivateJob = new CronJob(
