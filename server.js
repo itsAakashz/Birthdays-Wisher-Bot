@@ -117,7 +117,7 @@ I'll make sure your friends receive warm wishes on their special day! 🎈
   ctx.reply(message);
 });
 
-// Command to add birthdays (for DM only)
+// Command to add birthdays (for DM only)------------------------------------------------------------------------------------------
 bot.command("addbirthday", async (ctx) => {
   // Get user ID and check if the command is used in a private message
   const userId = ctx.message.from.id.toString();
@@ -168,7 +168,7 @@ bot.command("addbirthday", async (ctx) => {
   }
 });
 
-// Command to add a birthday (for groups only)
+// Command to add a birthday (for groups only)---------------------------------------------------------------------------------------
 bot.command("mybirthday", async (ctx) => {
   const userId = ctx.message.from.id.toString();
   const chatId = ctx.message.chat.id.toString();
@@ -214,7 +214,7 @@ bot.command("mybirthday", async (ctx) => {
   }
 });
 
-// Command to delete a birthday
+// Command to delete a birthday-----------------------------------------------------------------------------------------------------
 bot.command("deletebirthday", async (ctx) => {
   const userId = ctx.message.from.id.toString();
   const chatType = ctx.message.chat.type;
@@ -262,7 +262,7 @@ bot.command("deletebirthday", async (ctx) => {
   }
 });
 
-// Command to list all birthdays in a group or private chat
+// Command to list all birthdays in a group or private chat----------------------------------------------------------------------
 bot.command("birthdaylist", async (ctx) => {
   const chatId = ctx.message.chat.id.toString();
   const chatType = ctx.message.chat.type;
@@ -317,7 +317,7 @@ bot.command("birthdaylist", async (ctx) => {
   }
 });
 
-// Function to check for birthdays and send messages in private messages only
+// Function to check for birthdays and send messages in private messages only----------------------------------------------------
 async function checkBirthdayPrivate() {
   const today = new Date();
   const formattedToday = `${String(today.getDate()).padStart(2, "0")}-${String(
@@ -379,7 +379,7 @@ async function checkBirthdayPrivate() {
   }
 }
 
-// Function to check for birthdays and send messages in group chats
+// Function to check for birthdays and send messages in group chats-----------------------------------------------------------------
 // Utility function to format a date as DD-MM
 function formatDate(date) {
   return `${String(date.getDate()).padStart(2, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -496,7 +496,7 @@ const checkBirthdayGroupJob = new CronJob(
 checkBirthdayPrivateJob.start();
 checkBirthdayGroupJob.start();
 
-// Help command with buttons and features explanation
+// Help command with buttons and features explanation-----------------------------------------------------------------------------
 bot.command("help", (ctx) => {
   const helpMessage = `🤖 *Welcome to Birthday Reminder Bot* 🎉
 
@@ -578,7 +578,7 @@ bot.action("about", (ctx) => ctx.reply(ABOUT_REPLY));
 // Basic responses
 bot.on("sticker", (ctx) => ctx.reply("👍"));
 
-//Analytics command
+//Analytics command--------------------------------------------------------------------------------------------------------------
 bot.command("analytics", (ctx) => {
   const chatId = ctx.message.chat.id;
   const isGroup = chatId < 0;
@@ -595,7 +595,7 @@ bot.command("analytics", (ctx) => {
   }
 });
 
-//broadcast command start here
+//broadcast command start here------------------------------------------------------------------------------------------------------
 const BOT_OWNER_ID = process.env.BOT_OWNER_ID; // Add the bot owner's Telegram user ID to your .env file
 
 bot.command('broadcast', async (ctx) => {
